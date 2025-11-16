@@ -419,6 +419,35 @@ function AppContent() {
           })}
         </div>
 
+        {/* Extract Elements from Reality Button */}
+        <button
+          onClick={() => {
+            // Add functionality here if needed
+          }}
+          style={{
+            width: "calc(100% - 2rem)",
+            padding: "0.75rem 1rem",
+            fontSize: "1rem",
+            fontWeight: "bold",
+            backgroundColor: "#4caf50",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            marginTop: "auto",
+            marginBottom: "0.75rem",
+            transition: "background-color 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#45a049";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "#4caf50";
+          }}
+        >
+          Extract Elements from Reality
+        </button>
+
         {/* Back to Home Button - positioned at bottom */}
         <button
           onClick={() => navigate("/")}
@@ -432,7 +461,7 @@ function AppContent() {
             border: "none",
             borderRadius: "8px",
             cursor: "pointer",
-            marginTop: "auto",
+            marginTop: "0",
             marginBottom: "1rem",
             transition: "background-color 0.2s ease",
           }}
@@ -789,7 +818,7 @@ function AppContent() {
                     padding: "1rem 2rem",
                     backgroundColor: "#f5f5f5",
                     borderRadius: "8px",
-                    marginTop: "1.5rem",
+                    marginTop: "4.5rem",
                   }}
                 >
                   <p
