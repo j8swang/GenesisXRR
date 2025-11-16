@@ -1,8 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+} from "react-router-dom";
 import SecondPage from "./SecondPage";
 import ModelDemo from "./ModelDemo";
+import HomePage from "./HomePage";
 import { Model } from "@webspatial/react-sdk";
 import fireModel from "./assets/models/fire.usdz?url";
 import earthModel from "./assets/models/Earth.usdz?url";
@@ -91,6 +97,7 @@ const canCombine = (
 };
 
 function AppContent() {
+  const navigate = useNavigate();
   const [firstSelected, setFirstSelected] = useState<ElementType | null>(null);
   const [secondSelected, setSecondSelected] = useState<ElementType | null>(
     null
@@ -358,6 +365,33 @@ function AppContent() {
             </div>
           </>
         )}
+
+        {/* Back to Home Button - positioned at bottom */}
+        <button
+          onClick={() => navigate("/")}
+          style={{
+            width: "calc(100% - 2rem)",
+            padding: "0.75rem 1rem",
+            fontSize: "1rem",
+            fontWeight: "bold",
+            backgroundColor: "#646cff",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            marginTop: "auto",
+            marginBottom: "1rem",
+            transition: "background-color 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#535bf2";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "#646cff";
+          }}
+        >
+          ← Back to Home
+        </button>
       </div>
       <div className="right-area" enable-xr>
         <div className="top-section" enable-xr>
@@ -705,9 +739,10 @@ function App() {
   return (
     <Router basename={__XR_ENV_BASE__}>
       <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/play" element={<AppContent />} />
         <Route path="/second-page" element={<SecondPage />} />
         <Route path="/model-demo" element={<ModelDemo />} />
-        <Route path="/" element={<AppContent />} />
       </Routes>
     </Router>
   );

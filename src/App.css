@@ -19,6 +19,9 @@
   padding: 1rem;
   border-radius: 8px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
 .menu-column-right {
