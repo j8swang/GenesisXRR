@@ -18,6 +18,7 @@ import dirtModel from "./assets/models/Dirt.usdz?url";
 import sandModel from "./assets/models/Sand.usdz?url";
 import glassModel from "./assets/models/Glass.usdz?url";
 import woodModel from "./assets/models/Wood.usdz?url";
+import clayModel from "./assets/models/Clay.usdz?url";
 
 declare const __XR_ENV_BASE__: string;
 
@@ -30,7 +31,8 @@ type ElementType =
   | "dirt"
   | "sand"
   | "glass"
-  | "wood";
+  | "wood"
+  | "clay";
 
 interface Element {
   id: ElementType;
@@ -47,6 +49,7 @@ const BASIC_ELEMENTS: Element[] = [
   { id: "sand", name: "Sand", emoji: "🏖️" },
   { id: "glass", name: "Glass", emoji: "🪟" },
   { id: "wood", name: "Wood", emoji: "🪵" },
+  { id: "clay", name: "Clay", emoji: "🧱" },
 ];
 
 const getModelUrl = (element: ElementType): string => {
@@ -67,6 +70,8 @@ const getModelUrl = (element: ElementType): string => {
       return glassModel;
     case "wood":
       return woodModel;
+    case "clay":
+      return clayModel;
     default:
       return fireModel;
   }
@@ -78,7 +83,25 @@ type CombinationRule = [ElementType, ElementType, ElementType];
 const COMBINATION_RULES: CombinationRule[] = [
   ["earth", "water", "mud"],
   ["fire", "sand", "glass"],
+  ["mud", "sand", "clay"],
 ];
+
+// Descriptions for element combinations
+const getCombinationDescription = (
+  element1: ElementType,
+  element2: ElementType
+): string | null => {
+  const sorted = [element1, element2].sort().join("+");
+  const descriptions: Record<string, string> = {
+    "earth+water":
+      "Water mixes with tiny soil particles that don't dissolve. Instead, they stay suspended throughout the water, creating a thick, squishy mixture called mud.",
+    "mud+sand":
+      "Fine mud particles fill the spaces between larger sand grains. As water drains or pressure increases, the particles compact tightly, forming smooth, moldable clay.",
+    "fire+sand":
+      "Sand, mostly silica, melts only at extremely high temperatures. When heated intensely, it becomes liquid, and if cooled quickly, it hardens into non-crystalline, transparent glass.",
+  };
+  return descriptions[sorted] || null;
+};
 
 // Check if two elements can combine and return the result
 const canCombine = (
@@ -307,64 +330,58 @@ function AppContent() {
               </button>
             );
           })}
-        </div>
-
-        {/* Unlocked Section */}
-        {newlyUnlockedElements.length > 0 && (
-          <>
-            <h2
+          {/* Divider between basic and newly created elements */}
+          {newlyUnlockedElements.length > 0 && (
+            <div
               style={{
-                textAlign: "center",
-                marginBottom: "0.5rem",
-                marginTop: "4rem",
-                fontSize: "1.8rem",
-                fontWeight: "bold",
+                width: "100%",
+                height: "1px",
+                backgroundColor: "#e0e0e0",
+                marginTop: "1rem",
+                marginBottom: "1rem",
               }}
-            >
-              Unlocked
-            </h2>
-            <div className="element-menu" enable-xr>
-              {BASIC_ELEMENTS.filter((element) =>
-                newlyUnlockedElements.includes(element.id)
-              ).map((element) => {
-                const isFirstSelected = firstSelected === element.id;
-                const isSecondSelected = secondSelected === element.id;
-                return (
-                  <button
-                    key={element.id}
-                    className={[
-                      "element-button",
-                      isFirstSelected ? "selected-first" : "",
-                      isSecondSelected ? "selected-second" : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                    onClick={(e) => handleElementClick(element.id, e)}
-                    type="button"
-                    enable-xr
-                  >
-                    <span className="element-emoji" enable-xr>
-                      {element.emoji}
-                    </span>
-                    <span className="element-name" enable-xr>
-                      {element.name}
-                    </span>
-                    {isFirstSelected && (
-                      <span style={{ marginLeft: "auto", fontSize: "0.8rem" }}>
-                        1st
-                      </span>
-                    )}
-                    {isSecondSelected && (
-                      <span style={{ marginLeft: "auto", fontSize: "0.8rem" }}>
-                        2nd
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </>
-        )}
+            />
+          )}
+          {/* Newly Unlocked Elements - appear chronologically */}
+          {BASIC_ELEMENTS.filter((element) =>
+            newlyUnlockedElements.includes(element.id)
+          ).map((element) => {
+            const isFirstSelected = firstSelected === element.id;
+            const isSecondSelected = secondSelected === element.id;
+            return (
+              <button
+                key={element.id}
+                className={[
+                  "element-button",
+                  isFirstSelected ? "selected-first" : "",
+                  isSecondSelected ? "selected-second" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                onClick={(e) => handleElementClick(element.id, e)}
+                type="button"
+                enable-xr
+              >
+                <span className="element-emoji" enable-xr>
+                  {element.emoji}
+                </span>
+                <span className="element-name" enable-xr>
+                  {element.name}
+                </span>
+                {isFirstSelected && (
+                  <span style={{ marginLeft: "auto", fontSize: "0.8rem" }}>
+                    1st
+                  </span>
+                )}
+                {isSecondSelected && (
+                  <span style={{ marginLeft: "auto", fontSize: "0.8rem" }}>
+                    2nd
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
 
         {/* Back to Home Button - positioned at bottom */}
         <button
@@ -632,26 +649,28 @@ function AppContent() {
                 flexDirection: "column",
                 gap: "1rem",
                 alignItems: "center",
+                paddingLeft: "1.5rem",
+                paddingRight: "1.5rem",
               }}
             >
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "0.5rem",
-                  padding: "0.75rem 1rem",
+                  gap: "0.75rem",
+                  padding: "1.25rem 2rem",
                   backgroundColor: "#ffffff",
                   borderRadius: "8px",
                   width: "100%",
                   justifyContent: "center",
                 }}
               >
-                <span style={{ fontSize: "1.5rem" }}>
+                <span style={{ fontSize: "2.5rem" }}>
                   {BASIC_ELEMENTS.find((e) => e.id === recipe[0])?.emoji}
                 </span>
                 <span
                   style={{
-                    fontSize: "1rem",
+                    fontSize: "1.4rem",
                     fontWeight: "500",
                     color: "#000000",
                   }}
@@ -661,7 +680,7 @@ function AppContent() {
               </div>
               <span
                 style={{
-                  fontSize: "1.5rem",
+                  fontSize: "2rem",
                   fontWeight: "bold",
                   color: "#000000",
                 }}
@@ -672,20 +691,20 @@ function AppContent() {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "0.5rem",
-                  padding: "0.75rem 1rem",
+                  gap: "0.75rem",
+                  padding: "1.25rem 2rem",
                   backgroundColor: "#ffffff",
                   borderRadius: "8px",
                   width: "100%",
                   justifyContent: "center",
                 }}
               >
-                <span style={{ fontSize: "1.5rem" }}>
+                <span style={{ fontSize: "2.5rem" }}>
                   {BASIC_ELEMENTS.find((e) => e.id === recipe[1])?.emoji}
                 </span>
                 <span
                   style={{
-                    fontSize: "1rem",
+                    fontSize: "1.4rem",
                     fontWeight: "500",
                     color: "#000000",
                   }}
@@ -695,7 +714,7 @@ function AppContent() {
               </div>
               <span
                 style={{
-                  fontSize: "1.5rem",
+                  fontSize: "2rem",
                   fontWeight: "bold",
                   color: "#000000",
                 }}
@@ -706,20 +725,20 @@ function AppContent() {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "0.5rem",
-                  padding: "0.75rem 1rem",
+                  gap: "0.75rem",
+                  padding: "1.25rem 2rem",
                   backgroundColor: "#646cff",
                   borderRadius: "8px",
                   width: "100%",
                   justifyContent: "center",
                 }}
               >
-                <span style={{ fontSize: "1.5rem" }}>
+                <span style={{ fontSize: "2.5rem" }}>
                   {BASIC_ELEMENTS.find((e) => e.id === newlyCreated)?.emoji}
                 </span>
                 <span
                   style={{
-                    fontSize: "1rem",
+                    fontSize: "1.4rem",
                     fontWeight: "bold",
                     color: "#ffffff",
                   }}
@@ -727,6 +746,29 @@ function AppContent() {
                   {BASIC_ELEMENTS.find((e) => e.id === newlyCreated)?.name}
                 </span>
               </div>
+              {recipe && getCombinationDescription(recipe[0], recipe[1]) && (
+                <div
+                  style={{
+                    width: "100%",
+                    padding: "1rem 2rem",
+                    backgroundColor: "#f5f5f5",
+                    borderRadius: "8px",
+                    marginTop: "1.5rem",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: "1.2rem",
+                      color: "#333",
+                      lineHeight: "1.6",
+                      margin: 0,
+                      textAlign: "left",
+                    }}
+                  >
+                    {getCombinationDescription(recipe[0], recipe[1])}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}
