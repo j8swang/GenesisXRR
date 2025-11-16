@@ -9,6 +9,7 @@ import {
 import SecondPage from "./SecondPage";
 import ModelDemo from "./ModelDemo";
 import HomePage from "./HomePage";
+import Library from "./Library";
 import { Model } from "@webspatial/react-sdk";
 import fireModel from "./assets/models/fire.usdz?url";
 import earthModel from "./assets/models/Earth.usdz?url";
@@ -47,6 +48,36 @@ interface Element {
   name: string;
   emoji?: string;
 }
+
+interface DiscoveredCombination {
+  element1: ElementType;
+  element2: ElementType;
+  result: ElementType;
+  timestamp: number;
+}
+
+// Helper functions to manage discovered combinations in localStorage
+const saveDiscoveredCombination = (combination: DiscoveredCombination) => {
+  const existing = getDiscoveredCombinations();
+  // Check if this combination already exists
+  const exists = existing.some(
+    (c) =>
+      ((c.element1 === combination.element1 &&
+        c.element2 === combination.element2) ||
+        (c.element1 === combination.element2 &&
+          c.element2 === combination.element1)) &&
+      c.result === combination.result
+  );
+  if (!exists) {
+    const updated = [...existing, combination];
+    localStorage.setItem("discoveredCombinations", JSON.stringify(updated));
+  }
+};
+
+const getDiscoveredCombinations = (): DiscoveredCombination[] => {
+  const stored = localStorage.getItem("discoveredCombinations");
+  return stored ? JSON.parse(stored) : [];
+};
 
 const BASIC_ELEMENTS: Element[] = [
   { id: "earth", name: "Earth", emoji: "🌍" },
@@ -131,6 +162,10 @@ const getCombinationDescription = (
   };
   return descriptions[sorted] || null;
 };
+
+// Export for use in Library component
+export { getDiscoveredCombinations, getCombinationDescription, BASIC_ELEMENTS };
+export type { DiscoveredCombination, ElementType };
 
 // Check if two elements can combine and return the result
 const canCombine = (
@@ -293,6 +328,14 @@ function AppContent() {
 
     // Store the recipe
     setRecipe([firstSelected, secondSelected]);
+
+    // Save discovered combination to localStorage
+    saveDiscoveredCombination({
+      element1: firstSelected,
+      element2: secondSelected,
+      result: result,
+      timestamp: Date.now(),
+    });
 
     // Add the newly created element to newly unlocked elements if not already unlocked
     setNewlyUnlockedElements((prev) => {
@@ -837,6 +880,35 @@ function AppContent() {
             </div>
           </div>
         )}
+        {/* Library Button - positioned at bottom */}
+        <button
+          onClick={() => navigate("/library")}
+          style={{
+            width: "calc(100% - 2rem)",
+            padding: "0.75rem 1rem",
+            fontSize: "1rem",
+            fontWeight: "bold",
+            backgroundColor: "#ff9800",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            marginTop: "auto",
+            marginBottom: "1.5rem",
+            marginLeft: "auto",
+            marginRight: "auto",
+            alignSelf: "center",
+            transition: "background-color 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#e68900";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "#ff9800";
+          }}
+        >
+          Library
+        </button>
       </div>
     </div>
   );
@@ -850,6 +922,7 @@ function App() {
         <Route path="/play" element={<AppContent />} />
         <Route path="/second-page" element={<SecondPage />} />
         <Route path="/model-demo" element={<ModelDemo />} />
+        <Route path="/library" element={<Library />} />
       </Routes>
     </Router>
   );

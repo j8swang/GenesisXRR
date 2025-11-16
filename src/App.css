@@ -31,6 +31,11 @@
   padding: 1rem;
   border-radius: 8px;
   overflow-y: auto;
+  min-height: 80vh;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
 .element-menu {
@@ -247,4 +252,3 @@
 .read-the-docs {
   color: #888;
 }
-
