@@ -19,6 +19,10 @@ import sandModel from "./assets/models/Sand.usdz?url";
 import glassModel from "./assets/models/Glass.usdz?url";
 import woodModel from "./assets/models/Wood.usdz?url";
 import clayModel from "./assets/models/Clay.usdz?url";
+import windModel from "./assets/models/Wind.usdz?url";
+import charcoalModel from "./assets/models/Charcoal.usdz?url";
+import lavaModel from "./assets/models/lava.usdz?url";
+import stoneModel from "./assets/models/Stone.usdz?url";
 
 declare const __XR_ENV_BASE__: string;
 
@@ -32,7 +36,11 @@ type ElementType =
   | "sand"
   | "glass"
   | "wood"
-  | "clay";
+  | "clay"
+  | "wind"
+  | "charcoal"
+  | "lava"
+  | "stone";
 
 interface Element {
   id: ElementType;
@@ -50,6 +58,10 @@ const BASIC_ELEMENTS: Element[] = [
   { id: "glass", name: "Glass", emoji: "🪟" },
   { id: "wood", name: "Wood", emoji: "🪵" },
   { id: "clay", name: "Clay", emoji: "🧱" },
+  { id: "wind", name: "Wind", emoji: "💨" },
+  { id: "charcoal", name: "Charcoal", emoji: "⚫" },
+  { id: "lava", name: "Lava", emoji: "🌋" },
+  { id: "stone", name: "Stone", emoji: "🪨" },
 ];
 
 const getModelUrl = (element: ElementType): string => {
@@ -72,6 +84,14 @@ const getModelUrl = (element: ElementType): string => {
       return woodModel;
     case "clay":
       return clayModel;
+    case "wind":
+      return windModel;
+    case "charcoal":
+      return charcoalModel;
+    case "lava":
+      return lavaModel;
+    case "stone":
+      return stoneModel;
     default:
       return fireModel;
   }
@@ -84,6 +104,9 @@ const COMBINATION_RULES: CombinationRule[] = [
   ["earth", "water", "mud"],
   ["fire", "sand", "glass"],
   ["mud", "sand", "clay"],
+  ["fire", "wood", "charcoal"],
+  ["earth", "fire", "lava"],
+  ["lava", "water", "stone"],
 ];
 
 // Descriptions for element combinations
@@ -99,6 +122,12 @@ const getCombinationDescription = (
       "Fine mud particles fill the spaces between larger sand grains. As water drains or pressure increases, the particles compact tightly, forming smooth, moldable clay.",
     "fire+sand":
       "Sand, mostly silica, melts only at extremely high temperatures. When heated intensely, it becomes liquid, and if cooled quickly, it hardens into non-crystalline, transparent glass.",
+    "fire+wood":
+      "Heating wood with limited oxygen drives out water and gases. This process, called pyrolysis, leaves behind carbon-rich charcoal, which burns hotter and cleaner than raw wood.",
+    "earth+fire":
+      "Deep underground, rock exposed to intense heat begins to melt into thick, molten magma. When this molten rock reaches the surface, it flows outward as lava.",
+    "lava+water":
+      "When molten lava meets water, it rapidly cools and solidifies. The sudden temperature change causes the lava to crystallize and harden into solid stone, preserving the volcanic material's structure.",
   };
   return descriptions[sorted] || null;
 };
@@ -128,7 +157,14 @@ function AppContent() {
   const [supported, setSupported] = useState(false);
   const [newlyCreated, setNewlyCreated] = useState<ElementType | null>(null);
   const [recipe, setRecipe] = useState<[ElementType, ElementType] | null>(null);
-  const startingElements: ElementType[] = ["earth", "water", "fire", "sand"];
+  const startingElements: ElementType[] = [
+    "earth",
+    "water",
+    "fire",
+    "sand",
+    "wind",
+    "wood",
+  ];
   const [newlyUnlockedElements, setNewlyUnlockedElements] = useState<
     ElementType[]
   >([]);
